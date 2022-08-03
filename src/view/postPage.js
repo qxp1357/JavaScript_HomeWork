@@ -1,10 +1,10 @@
-import React ,{useLayoutEffect, useState} from 'react';
-import {useRecoilState} from "recoil";
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { useRecoilState } from "recoil";
 import { useParams } from 'react-router-dom';
-import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import {userDataAtom, tabContainerAtom} from "../component/atoms";
-import ViewPort from '../component/viewPort';
+import { userDataAtom } from "../component/atoms";
+import { Link } from "react-router-dom";
+import ListItem from '../component/listItem';
 
 const TabMenu = styled.ul`
   background-color: #dcdcdc;
@@ -21,79 +21,84 @@ const TabMenu = styled.ul`
     cursor: pointer;
   }
 `;
-const tabNameList ={
-  total:"전체", nonComplete:"작성중",complete:"완료"
+const tabNameList = {
+  total: "전체", nonComplete: "작성중", complete: "완료"
 };
 
-const PostPage =(param)=>{
+const PostPage = () => {
   const params = useParams(); //id 값만 가져옴 
-  const [userData, setUserData]=useRecoilState(userDataAtom); //전체 데이터 아톰 가져옴
+  const [userData] = useRecoilState(userDataAtom); //전체 데이터 아톰 가져옴
   const [tabContainer, setTabContainer] = useState([]);
-
   const [currentTab, setCurrentTab] = useState(0);
-  console.log("PostPage---userData",userData);
+  const [currentData, setCurrentData] = useState([]);
+  console.log("PostPage---userData", userData);
+
 
   //탭 아이템 만들기
-  const makeTabItem = ()=>{
-    let tempList =[]; 
+  const makeTabItem = useCallback(() => {
+    let tempList = [];
     let total = [];
     let nonComplete = [];
-    let complete =[];
-    // console.log("PostPage---userData",userData);
+    let complete = [];
     total = userData;
-    console.log("PostPage---params",params);
-    userData.map((item)=>{
-      if(item.completed){
-          complete.push(item)
-      }else{
-          nonComplete.push(item)
+    console.log("PostPage---params", params);
+    userData.forEach((item) => {
+      if (item.completed) {
+        complete.push(item)
+      } else {
+        nonComplete.push(item)
       }
-  });
-  tempList = [total,nonComplete,complete];
-  console.log("PostPage---tempList",tempList);
-  setTabContainer(tempList);
+    });
+    tempList = [total, nonComplete, complete];
+    console.log("PostPage---tempList", tempList);
+    let filteredData = tempList[currentTab]?.filter((item) => item.userId === Number(params.userId))
+    setTabContainer(tempList);
+    setCurrentData(filteredData);
+  },[userData, currentTab,params])
+
+  const makeCurrentData = useCallback(() => {
+    let filteredData = tabContainer[currentTab ?? 0]?.filter((item) => item.userId === Number(params.userId))
+    setCurrentData(filteredData);
+  },[tabContainer,currentTab,params]);
+
+  useLayoutEffect(() => {
+    makeTabItem();
+  }, [makeTabItem]);
+
+  useLayoutEffect(() => {
+    makeCurrentData();
+  }, [currentTab, tabContainer,makeCurrentData]);
+
+  console.log("PostPage---params", params);
+  console.log("PostPage---tabContainer", tabContainer);
+  console.log("PostPage---currentData", currentData);
+
+  const tabMenuHandler = (index) => {
+    setCurrentTab(index);
   }
 
-
-  useLayoutEffect(()=>{
-    makeTabItem();
-  },[]);
-
-
-  console.log("PostPage---params",params);
-  console.log("PostPage---tabContainer",tabContainer);
-
-  const tabMenuHandler = (index)=>{
-
-    setCurrentTab(index);
-}
-
-    return (<div>
-        <h1 align="center">
-          {"UserId : " + params.userId}
-        </h1>
-        {/* 유저의 탭별 포스트 리스트 뿌려야함 
-        필요한것.. 
-        유저 아이디 탭별 리스트 
-        탭 아이템들한테서 해당 유저의 포스트를 선별함 
-        구체적 선별은 뷰포트에서 하므로 
-        아이디랑 탭데이터만 넘겨주면됨
-        */}
-      <TabMenu> 
-        <ul style={{listStyle:"none"}}>
-          {Object.keys(tabNameList).map((item,index)=>{
-            return <li style={{float:"left", marginRight:"20px"}}
+  return (<div>
+    <h1 align="center">
+      {"UserId : " + params.userId}
+    </h1>
+    <TabMenu>
+      <ul style={{ listStyle: "none" }}>
+        {Object.keys(tabNameList)?.map((item, index) => {
+          return <li style={{ float: "left", marginRight: "20px" }}
             key={index}
-            onClick={()=>{tabMenuHandler(index)}}
-            >
-             {tabNameList[item]}
-            </li>
-          })}        
-        </ul>
-      </TabMenu>
-      {ViewPort({viewMode:1,rawData:tabContainer[currentTab],filterData:params.userId})}
-
-    </div>);
+            onClick={() => { tabMenuHandler(index) }}
+          >
+            {tabNameList[item]}
+          </li>
+        })}
+      </ul>
+    </TabMenu>
+    {currentData?.map((item, index) => {
+      return <Link to={`/${item.userId}/${index}/${JSON.stringify(currentData)}`}>
+        <ListItem label="title" item={item.title} />
+      </Link>
+    })}
+  </div>);
 }
 
 export default PostPage;
