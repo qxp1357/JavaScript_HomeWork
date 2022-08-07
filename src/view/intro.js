@@ -2,24 +2,36 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useRecoilState } from "recoil";
 import axios from 'axios';
 import { Link } from "react-router-dom";
-import { userDataAtom } from "../component/atoms";
+import { userDataAtom, userListAtom } from "../component/atoms";
 import ListItem from '../component/listItem';
-
 
 const Intro = () => {
   const [, setUserData] = useRecoilState(userDataAtom);
+  const [userList, setUserList] = useRecoilState(userListAtom);
   const [userIdList, setUserIdList] = useState([]);
 
+
+  //UserList 데이터를 가져옴 
+
+  const getUserList = useCallback(() => {
+    return axios({ method: "get", url: "https://jsonplaceholder.typicode.com/users", }).then((res) => {
+      console.log("getUserList----res", res.data);
+      setUserList(res.data);
+    })
+
+  }, [setUserList]);
+
   //유저 데이터를 가져옴
-  const getUserData = useCallback( () => {
+  const getUserData = useCallback(() => {
     return axios({
       method: "get",
       url: "https://jsonplaceholder.typicode.com/todos",
     }).then((res) => {
+      console.log("setUserData", res.data);
       setUserData(res.data);
       makeUserIdData(res.data);
     })
-  },[setUserData]);
+  }, [setUserData]);
 
   const makeUserIdData = (data) => {
     const userKeys = Object.keys(data[0]);
@@ -31,17 +43,19 @@ const Intro = () => {
     }
     const set = new Set(list);
     const uniqueList = [...set];
+
     return setUserIdList(uniqueList);
   }
 
   useLayoutEffect(() => {
+    getUserList();
     getUserData();
-  }, [getUserData]);
+  }, [getUserList, getUserData]);
 
 
   return <div>
     <span>
-      <h1 id="Title" align="center">
+      <h1 className="text-5xl" id="Title" align="center">
         게시판
       </h1>
     </span>
@@ -50,15 +64,40 @@ const Intro = () => {
         {"유저 수 : " + userIdList.length + "명"}
       </h3>
     </span>
-    <span>
-      <ul style={{ listStyle: "none" }}>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {userIdList.map((item) => {
+        return <Link to={`postPage/${item}`}>
+          <div
+            key={userList[userList.findIndex(user => user.id === item)].email}
+            className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+          >
+            <div className="flex-shrink-0">
+              {userList[userList.findIndex(user => user.id === item)].email}
+              {/* <img className="h-10 w-10 rounded-full" src */}
+            </div>
+            <div className="flex-1 min-w-0">
+              <a href="#" className="focus:outline-none">
+                <span className="absolute inset-0" aria-hidden="true" />
+                <p className="text-sm font-medium text-gray-900">
+                  {userList[userList.findIndex(user => user.id === item)].email.name}
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  <ListItem label="userId" item={item} />
+                </p>
+              </a>
+            </div>
+          </div>
+
+        </Link>
+      })}
+      {/* <ul style={{ listStyle: "none" }}>
         {userIdList.map((item) => {
           return <Link to={`postPage/${item}`}>
             <ListItem item={item} />
           </Link>
         })}
-      </ul>
-    </span>
+      </ul> */}
+    </div>
   </div>;
 }
 

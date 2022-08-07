@@ -2,9 +2,22 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useRecoilState } from "recoil";
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { userDataAtom } from "../component/atoms";
+import { userDataAtom,userListAtom } from "../component/atoms";
 import { Link } from "react-router-dom";
 import ListItem from '../component/listItem';
+// import { CheckIcon, ThumbUpIcon, UserIcon } from '@heroicons/react/solid';
+
+const tabs = [
+  { name: 'Applied', href: '#', current: false },
+  { name: 'Phone Screening', href: '#', current: false },
+  { name: 'Interview', href: '#', current: true },
+  { name: 'Offer', href: '#', current: false },
+  { name: 'Hired', href: '#', current: false },
+]
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
 
 const TabMenu = styled.ul`
   background-color: #dcdcdc;
@@ -28,6 +41,7 @@ const tabNameList = {
 const PostPage = () => {
   const params = useParams(); //id 값만 가져옴 
   const [userData] = useRecoilState(userDataAtom); //전체 데이터 아톰 가져옴
+  const [userList, setUserList] = useRecoilState(userListAtom); //새로운 유저 데이터 
   const [tabContainer, setTabContainer] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
   const [currentData, setCurrentData] = useState([]);
@@ -54,12 +68,12 @@ const PostPage = () => {
     let filteredData = tempList[currentTab]?.filter((item) => item.userId === Number(params.userId))
     setTabContainer(tempList);
     setCurrentData(filteredData);
-  },[userData, currentTab,params])
+  }, [userData, currentTab, params])
 
   const makeCurrentData = useCallback(() => {
     let filteredData = tabContainer[currentTab ?? 0]?.filter((item) => item.userId === Number(params.userId))
     setCurrentData(filteredData);
-  },[tabContainer,currentTab,params]);
+  }, [tabContainer, currentTab, params]);
 
   useLayoutEffect(() => {
     makeTabItem();
@@ -67,7 +81,7 @@ const PostPage = () => {
 
   useLayoutEffect(() => {
     makeCurrentData();
-  }, [currentTab, tabContainer,makeCurrentData]);
+  }, [currentTab, tabContainer, makeCurrentData]);
 
   console.log("PostPage---params", params);
   console.log("PostPage---tabContainer", tabContainer);
@@ -78,27 +92,109 @@ const PostPage = () => {
   }
 
   return (<div>
-    <h1 align="center">
+    <div className="pb-5 border-b border-gray-200 sm:pb-0">
+      <h3 className="text-lg leading-6 font-medium text-gray-900">
       {"UserId : " + params.userId}
-    </h1>
-    <TabMenu>
-      <ul style={{ listStyle: "none" }}>
-        {Object.keys(tabNameList)?.map((item, index) => {
-          return <li style={{ float: "left", marginRight: "20px" }}
-            key={index}
-            onClick={() => { tabMenuHandler(index) }}
-          >
-            {tabNameList[item]}
-          </li>
-        })}
-      </ul>
-    </TabMenu>
-    {currentData?.map((item, index) => {
-      return <Link to={`/${item.userId}/${index}/${JSON.stringify(currentData)}`}>
-        <ListItem label="title" item={item.title} />
-      </Link>
+        </h3>
+      <div className="mt-3 sm:mt-4">
+        <div className="sm:hidden">
+          <label htmlFor="current-tab" className="sr-only">
+            Select a tab
+          </label>
+            <select
+             id="current-tab"
+              name="current-tab"
+              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              defaultValue={tabs.find((tab) => tab.current).name}
+            >
+                {tabs.map((tab) => (
+                <option key={tab.name}>{tab.name}</option>
+              ))}
+            </select>
+        </div>
+        <div className="hidden sm:block">
+            <nav className="-mb-px flex space-x-8">
+            {Object.keys(tabNameList)?.map((item, index) => {
+           return <div
+           className={classNames(
+            index === currentTab
+              ? 'border-indigo-500 text-indigo-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+            'whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm'
+          )}
+             key={index}
+             onClick={() => { tabMenuHandler(index) }}
+           >
+             {tabNameList[item]}
+           </div>
+         })}
+            </nav>
+          </div>
+      </div>
+    </div>
+    <div className="flow-root">
+      <ul role="list" className="-mb-8 mt-8">
+      {currentData?.map((item, index) => {
+      return <li key={item.id}>
+          <div className="relative pb-8">
+            {index !== currentData.length -1 ?(
+                <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
+              ) : null}
+              <div className ="relative flex space-x-3">
+                <div>
+              <span
+                    className={classNames(
+                      'bg-green-400',
+                      'h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white'
+                    )}
+                  >
+                    {item.id}
+                  </span>
+                  </div>
+              <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+              <div>
+              <Link to={`/${item.userId}/${index}/${JSON.stringify(currentData)}`}>
+                <ListItem label="title" item={item.title} />
+                </Link>
+                <p className="text-sm text-gray-500">
+                <ListItem label="name" item={userList[userList.findIndex(user => user.id === item.userId)].name} />
+                    </p>
+                </div>
+              </div>
+              </div>
+          </div>
+        </li>
+
+
     })}
-  </div>);
+      </ul>
+    </div>
+   
+    </div>
+  )
+
+  // return (<div>
+  //   <h1 align="center">
+  //     {"UserId : " + params.userId}
+  //   </h1>
+  //   <TabMenu>
+  //     <ul style={{ listStyle: "none" }}>
+  //       {Object.keys(tabNameList)?.map((item, index) => {
+  //         return <li style={{ float: "left", marginRight: "20px" }}
+  //           key={index}
+  //           onClick={() => { tabMenuHandler(index) }}
+  //         >
+  //           {tabNameList[item]}
+  //         </li>
+  //       })}
+  //     </ul>
+  //   </TabMenu>
+  //   {currentData?.map((item, index) => {
+  //     return <Link to={`/${item.userId}/${index}/${JSON.stringify(currentData)}`}>
+  //       <ListItem label="title" item={item.title} />
+  //     </Link>
+  //   })}
+  // </div>);
 }
 
 export default PostPage;
