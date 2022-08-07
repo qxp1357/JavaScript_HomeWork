@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ListItem from '../component/listItem';
-
+import CommentComponent from '../component/commentComponent';
 
 const DetailPage = () => {
   const params = useParams(); //id 값만 가져옴 
@@ -40,6 +40,7 @@ const DetailPage = () => {
       <ListItem label="userId" item={data[Number(currentIndex)]?.userId} />
       <ListItem label="complete" item={data[Number(currentIndex)]?.completed} />
     </ul>
+    <CommentComponent />
     <div style={{ display: "flex", justifyContent: "space-evenly" }}>
 
 
