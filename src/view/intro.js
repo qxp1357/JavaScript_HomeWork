@@ -6,7 +6,7 @@ import { userDataAtom, userListAtom } from "../component/atoms";
 import ListItem from '../component/listItem';
 
 const Intro = () => {
-  const [, setUserData] = useRecoilState(userDataAtom);
+  const [userData, setUserData] = useRecoilState(userDataAtom);
   const [userList, setUserList] = useRecoilState(userListAtom);
   const [userIdList, setUserIdList] = useState([]);
 
@@ -47,11 +47,34 @@ const Intro = () => {
     return setUserIdList(uniqueList);
   }
 
+  // 유저 개인정보와 포스트 정보를 하나로 합침
+  const makeMergedData = ()=>{
+    let mergedData = [];
+
+    // userIdList.map((item, index)=>{
+    //   let userDataIndex = userData.findIndex(user=>user.userId ===item);
+    //   let userListIndex = userList.findIndex(user=>user.id ===item);
+    //   let tempData = {
+    //     [`${item}`]:[userList[userListIndex],
+    //                   userData
+    //   ],
+    //   }
+    //   mergedData.push(item);
+    // });
+
+  }
+
   useLayoutEffect(() => {
     getUserList();
     getUserData();
   }, [getUserList, getUserData]);
 
+
+  useLayoutEffect(()=>{
+    if(userList.length !== 0 && userData.length !==0){
+      makeMergedData();
+    }
+  },[userList,userData]);
 
   return <div>
     <span>
