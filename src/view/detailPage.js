@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ListItem from '../component/listItem';
 import CommentComponent from '../component/commentComponent';
-
+import WithDescription from '../component/withDescription';
 const DetailPage = () => {
   const params = useParams(); //id 값만 가져옴 
   const id = params.userId;
@@ -35,16 +35,8 @@ const DetailPage = () => {
   return (<>
     <h1>DetailPage</h1>
     현재글
-    <ul>
-      <ListItem label="title" item={data[Number(currentIndex)]?.title} />
-      <ListItem label="userId" item={data[Number(currentIndex)]?.userId} />
-      <ListItem label="complete" item={data[Number(currentIndex)]?.completed} />
-    </ul>
-    <CommentComponent />
-    <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-
-
-    </div>
+    <WithDescription {...data[Number(currentIndex)]}/>
+    {/* <CommentComponent /> */}
     <div style={{ display: "flex", justifyContent: "space-evenly" }}>
       <ul>
         <button
@@ -53,11 +45,7 @@ const DetailPage = () => {
         >
           이전글
         </button>
-        <ul>
-          <ListItem label="title" item={data[Number(currentIndex) - 1]?.title} />
-          <ListItem label="userId" item={data[Number(currentIndex) - 1]?.userId} />
-          <ListItem label="complete" item={data[Number(currentIndex) - 1]?.completed} />
-        </ul>
+        <WithDescription {...data[Number(currentIndex) - 1]}/>
       </ul>
 
       <ul>
@@ -67,11 +55,7 @@ const DetailPage = () => {
         >
           다음글
         </button>
-        <ul>
-          <ListItem label="title" item={data[Number(currentIndex) + 1]?.title} />
-          <ListItem label="userId" item={data[Number(currentIndex) + 1]?.userId} />
-          <ListItem label="complete" item={data[Number(currentIndex) + 1]?.completed} />
-        </ul>
+        <WithDescription {...data[Number(currentIndex) + 1]}/>
       </ul>
     </div>
   </>)
