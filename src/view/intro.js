@@ -99,7 +99,7 @@ const Intro = () => {
               {/* <img className="h-10 w-10 rounded-full" src */}
             </div>
             <div className="flex-1 min-w-0">
-              <a href="#" className="focus:outline-none">
+            
                 <span className="absolute inset-0" aria-hidden="true" />
                 <p className="text-sm font-medium text-gray-900">
                   {userList[userList.findIndex(user => user.id === item)].email.name}
@@ -107,7 +107,7 @@ const Intro = () => {
                 <p className="text-sm font-medium text-gray-900">
                   <ListItem label="userId" item={item} />
                 </p>
-              </a>
+          
             </div>
           </div>
 

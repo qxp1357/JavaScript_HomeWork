@@ -91,7 +91,8 @@ const PostPage = () => {
     console.log("tabMenuHandler--e", e.target.selectedIndex);
     setCurrentTab(e.target.selectedIndex);
   }
-  return (<div className="pb-5 border-b border-gray-200 sm:pb-0">
+  return (
+  <div className="pb-5 border-b border-gray-200 sm:pb-0">
     <h3 className="text-lg leading-6 font-medium text-gray-900">{"UserId : " + params.userId}</h3>
     <div className="mt-3 sm:mt-4">
       <div className="sm:hidden">
@@ -105,16 +106,15 @@ const PostPage = () => {
           defaultValue={tabs.find((tab) => tab.current).name}
         onChange={tabMenuHandler}
         >
-          {tabs.map((tab, index) => (
+          {tabs.map((tab) => (
             <option key={tab.name}>
               {tab.name}
             </option>
           ))}
         </select>
       </div>
-    </div>
-    <div className="flow-root">
-      <ul role="list" className="-mb-8 mt-8">
+      <div className="flow-root">
+      <ul role="listitem" className="-mb-8 mt-8">
         {currentData?.map((item, index) => {
           return <li key={item.id}>
             <div className="relative pb-8">
@@ -147,6 +147,7 @@ const PostPage = () => {
           </li>
         })}
       </ul>
+    </div>
     </div>
   </div>
   );

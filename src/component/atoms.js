@@ -13,3 +13,7 @@ export const userListAtom = atom({
   key:"userListAtomKey",
   default:[],
 })
+export const userCommentListAtom = atom({
+  key:"userCommentListAtomKey",
+  default:[],
+})
